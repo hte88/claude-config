@@ -1,0 +1,10 @@
+{
+  "name": "claude-config",
+  "version": "1.0.0",
+  "description": "Skills et configuration Claude personnalisés — Vue 3, Nuxt 4, TypeScript strict",
+  "author": {
+    "name": "hte88"
+  },
+  "repository": "https://github.com/hte88/claude-config",
+  "license": "MIT"
+}
