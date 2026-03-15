@@ -66,7 +66,43 @@ const count = ref(0) // inferred as Ref<number>
 const name = 'John'  // inferred as string
 ```
 
-**Rule 3: Use type guards for narrowing**
+**Rule 3: Prefer `type` over `interface`**
+
+Use `type` by default. Reserve `interface` only when you need declaration merging or `extends`.
+
+Bad:
+```typescript
+interface User {
+  id: string
+  name: string
+}
+```
+
+Good:
+```typescript
+type User = {
+  id: string
+  name: string
+}
+```
+
+**Rule 4: Use `as const` for static arrays**
+
+If an array is hardcoded and never mutated, add `as const` for narrower type inference.
+
+Bad:
+```typescript
+const roles = ['admin', 'editor', 'viewer']
+// type: string[]
+```
+
+Good:
+```typescript
+const roles = ['admin', 'editor', 'viewer'] as const
+// type: readonly ['admin', 'editor', 'viewer']
+```
+
+**Rule 5: Use type guards for narrowing**
 
 When working with `unknown`, use type guards to narrow types safely.
 
@@ -80,7 +116,27 @@ function isUser(value: unknown): value is User {
 
 ### Vue.js Rules
 
-**Rule 1: Prefer `function` over `const` for function declarations**
+**Rule 1: Script setup ordering**
+
+Follow this order in `<script setup>` **sauf si l'ordre d'exécution impose autrement** (ex: un ref utilisé par un composable doit être déclaré avant) :
+
+```typescript
+<script setup lang="ts">
+// 1. Types / Interfaces
+// 2. Props / Emits / Model
+// 3. Injections (useRoute, useI18n, stores, composables...)
+// 4. Refs / Reactive state
+// 5. Computed
+// 6. Watch
+// 7. Functions
+// 8. Lifecycle hooks (onMounted, etc.)
+// 9. defineExpose
+</script>
+```
+
+Si une dépendance d'exécution crée un conflit avec cet ordre, privilégier le bon fonctionnement du code et commenter pourquoi l'ordre dévie.
+
+**Rule 2: Prefer `function` over `const` for function declarations**
 
 Bad:
 ```typescript
@@ -103,7 +159,7 @@ Avoid Options API patterns. Use `<script setup>` with Composition API.
 **Rule 3: Destructure props and use `defineProps` with TypeScript**
 
 ```typescript
-interface Props {
+type Props = {
   userId: string
   isActive?: boolean
 }
@@ -147,7 +203,7 @@ When reviewing code, follow this structure:
 const result: any = await fetch()
 
 // CORRECT
-interface ApiResponse { data: User[] }
+type ApiResponse = { data: User[] }
 const result: ApiResponse = await fetch()
 ```
 
@@ -259,14 +315,14 @@ Example review output:
 ```typescript
 // components/UserProfile.vue
 <script setup lang="ts">
-interface Props {
+type Props = {
   userId: string
 }
 
 const props = defineProps<Props>()
 
 // Changed from 'any' to proper typing
-interface UserData {
+type UserData = {
   id: string
   name: string
   email: string
